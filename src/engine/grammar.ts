@@ -151,7 +151,7 @@ export function formLabel(form: HypothesisForm): string {
 
 export function describeForm(form: HypothesisForm, output: OutputSpec, variables: readonly Variable[]): string {
   const label = (name: string) => variables.find((v) => v.name === name)?.label ?? name;
-  const out = output.label;
+  const out = output.label.charAt(0).toUpperCase() + output.label.slice(1);
   if (form.terms.length === 0) return `${out} does not depend on any controlled variable (null model).`;
   if (form.terms.length === 1) {
     const t = form.terms[0];
@@ -172,6 +172,13 @@ export function fmt(v: number, digits = 3): string {
   if (a >= 1e5 || a < 1e-3) return v.toExponential(digits - 1).replace("e+", "e");
   const s = v.toPrecision(digits);
   return s.includes("e") ? Number(s).toString() : s.replace(/(\.\d*?[1-9])0+$/, "$1").replace(/\.0+$/, "");
+}
+
+/** R² near 1 is where the interesting differences are — never round it up to "1". */
+export function fmtR2(v: number): string {
+  if (!Number.isFinite(v)) return "—";
+  if (v >= 0.99995) return ">0.9999";
+  return v.toFixed(4);
 }
 
 const sup = (v: number) => {

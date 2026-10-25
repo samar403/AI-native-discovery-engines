@@ -141,9 +141,16 @@ export function designBatch(ctx: DesignContext): ExperimentDesign {
   const discPts = pick((s) => s.disagreement / maxD + beta * (s.nearest / maxN), batch - nOpt, optPts);
 
   const topGap = scored.reduce((a, s) => Math.max(a, s.gap), 0);
+  const factor = Math.exp(Math.min(topGap, 50));
   const gapText = ctx.logResponse
-    ? `${fmt((Math.exp(topGap) - 1) * 100, 2)}% apart`
-    : `${fmt(topGap)} ${lab.output.unit} apart`.trim();
+    ? factor >= 10
+      ? `${factor >= 1000 ? ">1000" : fmt(factor, 2)}× apart`
+      : `${fmt((factor - 1) * 100, 2)}% apart`
+    : (() => {
+        const ys = ctx.observations.map((o) => o.output);
+        const span = Math.max(...ys) - Math.min(...ys);
+        return topGap > 10 * span ? "more than 10× the observed range apart" : `${fmt(topGap)} ${lab.output.unit} apart`.trim();
+      })();
   const rivals = contenders
     .slice(0, 3)
     .map((h) => h.label)

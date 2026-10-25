@@ -9,7 +9,7 @@ import { HeuristicTheorist } from "./agents/heuristic";
 import type { DiscoveryAgent, TheoristProposal } from "./agents/types";
 import { designBatch } from "./design";
 import { shouldUseLogResponse, toDataset } from "./fit";
-import { fmt, formKey } from "./grammar";
+import { fmt, fmtR2, formKey } from "./grammar";
 import { HypothesisFactory } from "./hypotheses";
 import { findOptimum } from "./optimum";
 import { createRng, deriveSeed } from "./rng";
@@ -248,7 +248,7 @@ export async function* runEngine(config: EngineConfig): AsyncGenerator<EngineSte
       yield note(
         "Analyst",
         "insight",
-        `Leader ${best.id} ${best.label} — posterior ${fmt(best.weight * 100, 3)}%${equivalents.length ? ` (${fmt(confidence * 100, 3)}% incl. ${equivalents.length} observationally-equivalent form${equivalents.length > 1 ? "s" : ""})` : ""}, out-of-sample R² ${fmt(best.fit.cvR2, 4)}. Fitted law: ${best.fit.equation}.`,
+        `Leader ${best.id} ${best.label} — posterior ${fmt(best.weight * 100, 3)}%${equivalents.length ? ` (${fmt(confidence * 100, 3)}% incl. ${equivalents.length} observationally-equivalent form${equivalents.length > 1 ? "s" : ""})` : ""}, out-of-sample R² ${fmtR2(best.fit.cvR2)}. Fitted law: ${best.fit.equation}.`,
       );
     }
     for (const h of report.refuted) yield note("Critic", "warning", `✗ ${h.id} ${h.label} — ${h.verdict}`);
@@ -295,7 +295,7 @@ export async function* runEngine(config: EngineConfig): AsyncGenerator<EngineSte
       yield note(
         "System",
         "discovery",
-        `EUREKA — ${best.fit!.equation}. Held for ${streak.count} consecutive cycles with ${fmt(confidence * 100, 3)}% posterior and out-of-sample R² ${fmt(best.fit!.cvR2, 4)}, after ${observations.length} experiments.` +
+        `EUREKA — ${best.fit!.equation}. Held for ${streak.count} consecutive cycles with ${fmt(confidence * 100, 3)}% posterior and out-of-sample R² ${fmtR2(best.fit!.cvR2)}, after ${observations.length} experiments.` +
           (equivalents.length
             ? ` Note: ${equivalents.map((id) => hypotheses.find((x) => x.id === id)?.label).join(", ")} make indistinguishable predictions in the explored range.`
             : ""),
